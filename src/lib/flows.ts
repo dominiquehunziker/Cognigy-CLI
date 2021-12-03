@@ -15,6 +15,7 @@ import { removeCreateDir } from '../utils/checks';
 import { pullLocales } from './locales';
 import translateFlowNode, { translateIntentExampleSentence, translateSayNode } from '../utils/translators';
 import { makeAxiosRequest } from '../utils/axiosClient';
+import { runInParallel } from '../utils/parallel';
 
 import { indexAll } from '../utils/indexAll';
 
@@ -96,17 +97,19 @@ export const pullFlow = async (flowName: string, availableProgress: number): Pro
         const progressPerNode = progressPerLocale / 2 / chart.nodes.length;
 
         // iterate through all Nodes for this chart and add the information into the chart
-        for (let node of chart.nodes) {
-            const Node = await CognigyClient.readChartNode({
-                "nodeId": node._id,
-                "resourceId": flow._id,
-                "resourceType": "flow",
-                "preferredLocaleId": locale._id
-            });
-            node["config"] = Node.config;
-            delete node["preview"];
-            addToProgressBar(progressPerNode);
-        }
+        await runInParallel(async (node: any) => {
+                const Node = await CognigyClient.readChartNode({
+                    "nodeId": node._id,
+                    "resourceId": flow._id,
+                    "resourceType": "flow",
+                    "preferredLocaleId": locale._id
+                });
+                node["config"] = Node.config;
+                delete node["preview"];
+                addToProgressBar(progressPerNode);
+            },
+            chart.nodes,
+            10);
 
         fs.writeFileSync(localeDir + "/chart.json", JSON.stringify(chart, undefined, 4));
 
@@ -218,8 +221,8 @@ export const pushFlow = async (flowName: string, availableProgress: number, opti
                         form: form
                     });
 
-                    await checkTask(result?.data?._id, 0, options?.timeout || 10000);                    
-                } 
+                    await checkTask(result?.data?._id, 0, options?.timeout || 10000);
+                }
                 addToProgressBar(availableProgress / 2);
 
             } catch (err) {
@@ -374,7 +377,7 @@ export const trainFlow = async (flowName: string, timeout: number = 10000): Prom
     const flowDir = flowsDir + "/" + flowName;
 
     let flowConfig = null;
-    
+
     try {
         flowConfig = JSON.parse(fs.readFileSync(flowDir + "/config.json").toString());
     } catch (err) {
@@ -416,7 +419,7 @@ export interface ITranslateFlowOptions {
 }
 
 /**
- * 
+ *
  * @param flowName The name of the flow
  * @param fromLanguage  The locale in the flow that should be translated
  * @param targetLanguage The target langauge to translate to
@@ -467,7 +470,7 @@ export const translateFlow = async (flowName: string, options: ITranslateFlowOpt
         // localize Flow Nodes
          if (translateNodes) {
             console.log(`\nTranslating Flow Nodes in Flow '${flowName}'...\n`);
-                
+
             startProgressBar(100);
             for (let node of flowChart.nodes) {
                 const { _id: nodeId, localeReference, type } = node;
@@ -732,7 +735,7 @@ export const localizeFlow = async (flowName: string, availableProgress: number, 
             const onlyLocalizeContentNodes = options.contentOnly;
 
             console.log(`\n${options.reverse ? 'Removing localization from' : 'Adding localization to'} Flow Nodes...\n`);
-                
+
             startProgressBar(100);
             for (let node of flowChart.nodes) {
                 const { _id: nodeId, localeReference, type } = node;
@@ -770,7 +773,7 @@ export const localizeFlow = async (flowName: string, availableProgress: number, 
     } catch (err) {
 
     }
-    
+
     return Promise.resolve();
 };
 
