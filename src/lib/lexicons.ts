@@ -14,6 +14,7 @@ import CognigyClient from '../utils/cognigyClient';
 import { makeAxiosRequest } from '../utils/axiosClient';
 import { checkCreateDir, checkTask, removeCreateDir } from '../utils/checks';
 import { indexAll } from '../utils/indexAll';
+import { getAgent } from '../utils/proxyAgent';
 
 /**
  * Clones Cognigy Lexicons to disk
@@ -105,7 +106,10 @@ export const pullLexicon = async (lexiconName: string, availableProgress: number
     });
 
     // download the lexicon dataFile
-    const lexiconFile = (await axios.get(downloadLink.downloadLink)).data;
+    const lexiconFile = (await axios.get(
+        downloadLink.downloadLink,
+        { proxy: false, httpsAgent: getAgent() }  // use custom proxy agent
+    )).data;
 
     // write files to disk
     fs.writeFileSync(lexiconDir + "/keyphrases.csv", lexiconFile);

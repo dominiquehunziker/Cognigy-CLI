@@ -1,7 +1,8 @@
-import axios, { AxiosRequestConfig, AxiosResponse, Method} from 'axios';
+import axios, { AxiosRequestConfig, AxiosResponse, Method } from 'axios';
 import * as FormData from 'form-data';
 
 import CONFIG from './config';
+import { getAgent } from './proxyAgent';
 
 axios.defaults.headers.common = {
     "X-API-Key": CONFIG.apiKey
@@ -17,11 +18,11 @@ interface IMakeAxiosRequestOptions {
 
 /**
  * Executes the API Request
- * @param options 
+ * @param options
  */
 export const makeAxiosRequest = async (options: IMakeAxiosRequestOptions): Promise<AxiosResponse> => {
     const { method, path, data, form, type } = options;
-    
+
     const url = CONFIG.baseUrl + path;
     const axiosOptions: AxiosRequestConfig = {
         headers: {
@@ -31,7 +32,11 @@ export const makeAxiosRequest = async (options: IMakeAxiosRequestOptions): Promi
         },
         method,
         url,
-        data: form || data
+        data: form || data,
+
+        // use custom proxy agent
+        proxy: false,
+        httpsAgent: getAgent()
     };
 
     if (form) {

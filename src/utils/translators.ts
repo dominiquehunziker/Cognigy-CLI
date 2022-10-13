@@ -3,6 +3,8 @@ import chalk = require("chalk");
 import { StringDecoder }  from "string_decoder";
 import * as https from "https";
 
+import { getAgent } from "./proxyAgent";
+
 // Imports the Google Cloud client library
 const { Translate } = require('@google-cloud/translate').v2;
 
@@ -387,7 +389,11 @@ async function microsoftTranslate(text: string, language: string, apiKey: string
 				{
 					text
 				}
-			]
+			],
+
+            // use custom proxy agent
+            proxy: false,
+            httpsAgent: getAgent()
 		});
 
 		// Return the translated sentence only
@@ -418,7 +424,7 @@ async function googleTranslate(text: string, language: string, apiKey) {
 async function deepLTranslate(text: string, language: string, apiKey) {
 	try {
 		const decoder = new StringDecoder('utf-8');
-	
+
 		const translation: Buffer = await new Promise((resolve, reject) => {
 			const options = {
 				hostname: 'api.deepl.com',
@@ -502,8 +508,8 @@ const translate = async (text: string, language: string, translator: 'google' | 
 /**
  * Replaces CognigyScript and Snippets (Tokens) with a notranslate tag
  * So Translation Engines disregard them
- * 
- * @param text 
+ *
+ * @param text
  */
 const tokenizeText = (text: string): { tokens: string[], text: string } => {
 	// check if the text contains Cognigy Snippets (e.g. [[snippet-eyJsYWJlbCI6InRleHQiLCJzY3JpcHQiOiJjaS50ZXh0IiwidHlwZSI6ImlucHV0In0=]])

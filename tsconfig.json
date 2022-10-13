@@ -3,20 +3,23 @@
     "compilerOptions": {
       "emitDecoratorMetadata": true,
       "experimentalDecorators": true,
-      "target": "es2017", 
+      "target": "es2017",
       "module": "commonjs",
-      "rootDir": "src", 
+      "rootDir": "src",
       "outDir": "build",
       "sourceMap": true,
       "moduleResolution": "node",
       "watch": false,
-      "resolveJsonModule": true
+      "resolveJsonModule": true,
+      "allowJs": true
     },
     "exclude": [
       "node_modules",
       "old",
       "build",
       "./vscode",
-      "agent"
+      "agent",
+      "./*.js",
+      "./coverage/*.js"
     ]
   }

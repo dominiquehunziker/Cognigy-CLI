@@ -10,6 +10,7 @@ import type {
 import { BadRequestError } from "./BadRequestError";
 
 /* Custom Modules */
+import { getAgent } from "./proxyAgent";
 
 interface IOptions {
     retries?: number;
@@ -42,7 +43,6 @@ export class RestAdapter implements IHttpAdapter {
 
             axiosResponse = await Axios(axiosRequest) as AxiosResponse;
         } catch (err) {
-
             if (this.options.retries && retries < this.options.retries) {
                 console.log(`Retrying API request. Error was: ${err.message}`);
 
@@ -96,6 +96,10 @@ export class RestAdapter implements IHttpAdapter {
             url: `${baseUrl}${request.url}`,
             // @ts-ignore
             validateStatus: null,
+
+            // use custom proxy agent
+            proxy: false,
+            httpsAgent: getAgent()
         };
 
         return axiosRequest;

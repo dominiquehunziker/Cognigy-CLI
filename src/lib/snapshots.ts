@@ -6,6 +6,8 @@ import { Spinner }  from 'cli-spinner';
 import axios from 'axios';
 import * as fs from 'fs';
 
+import { getAgent } from '../utils/proxyAgent';
+
 /**
  * Creates a Snapshot
  */
@@ -47,7 +49,10 @@ export const createSnapshot = async (name: string, description: string, timeout:
             });
 
             spinner.setSpinnerTitle(`Downloading Snapshot ... %s`);
-            const snapshotFile = (await axios.get(downloadLink.downloadLink)).data;
+            const snapshotFile = (await axios.get(
+                downloadLink.downloadLink,
+                { proxy: false, httpsAgent: getAgent() }  // use custom proxy agent
+            )).data;
 
             fs.writeFileSync(snapshotDir + '/' + snap.name + '.csnap', snapshotFile);
         }
