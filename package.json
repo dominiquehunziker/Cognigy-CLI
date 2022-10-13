@@ -7,7 +7,7 @@
     "build": "npm run build:production && npm run test",
     "build:debug": "rimraf ./build && tsc && npm run execution-permission",
     "build:production": "rimraf ./build && npm run tsc:production && npm run execution-permission",
-    "execution-permission": "chmod +x ./build/cognigy.js",
+    "execution-permission": "",
     "test": "rimraf ./coverage && nyc mocha --require chai-autoload-plugins --recursive ./build/spec --exit --timeout 120000 --color --check-leaks  && rimraf ./.nyc_output",
     "test:tsmocha": "ts-mocha -p tsconfig.json --experimental-worker --recursive './src/spec/**/*.ts' --timeout 120000 --preserve-symlinks",
     "install-from-npm": "npm --registry=https://registry.npmjs.com/ i",
@@ -43,7 +43,7 @@
     "sinon": "8.1.1",
     "ts-mocha": "10.0.0",
     "tslint": "^6.1.1",
-    "typescript": "^3.8.3"
+    "typescript": "4.5.4"
   },
   "dependencies": {
     "@cognigy/rest-api-client": "^0.12.0",
